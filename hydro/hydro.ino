@@ -13,6 +13,7 @@ bool floodLevelState;
 long prevTimestamp;
 bool isLed;
 long prevBlinkTimestamp = 0;
+long prevPumpActionBlinkerTimestamp =0;
 bool needToPump;
 
 void setup() {
@@ -53,9 +54,11 @@ void loop() {
     digitalWrite(PUMPPIN, LOW);
     needToPump = 0;
   }
+  
 
   if (needToPump) {
     digitalWrite(PUMPPIN, HIGH);
+    PumpInAction();
   } else {
     digitalWrite(PUMPPIN, LOW);
   }
@@ -66,13 +69,26 @@ void loop() {
     Alarm();
   }
 
-  delay(100);
+  delay(20);
 }
 
 // Функция мигания светодиодом
 void Alarm () {
   if (millis() - prevBlinkTimestamp > 300) {
     prevBlinkTimestamp = millis(); 
+    if (!isLed) {
+      isLed = 1;
+    } else {
+      isLed = 0;
+    }
+    digitalWrite(LEDPIN, isLed);
+  }
+}
+
+// Pump active indicator (very quick blinking if pump has to be enabled)
+void PumpInAction () {
+  if (millis() - prevPumpActionBlinkerTimestamp >20) {
+    prevPumpActionBlinkerTimestamp = millis();
     if (!isLed) {
       isLed = 1;
     } else {
